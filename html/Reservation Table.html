@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bella Vista - Table Status</title>
+  <style>
+        :root {
+      --bg: #f4efe6;
+      --ink: #2b2118;
+      --card: #fffaf2;
+      --line: #d9cdb9;
+      --ok: #1fa856;
+      --bad: #d93636;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px)
+    }
+
+    @media (prefers-color-scheme:dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #17110c;
+        --ink: #f3e8d8;
+        --card: #241b13;
+        --line: #4a3a2a
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #17110c;
+      --ink: #f3e8d8;
+      --card: #241b13;
+      --line: #4a3a2a
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0
+    }
+
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px)
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.4 system-ui, sans-serif;
+      padding: 20px 4vw 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px
+    }
+
+    header {
+      width: min(100%, 1200px);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    h1 {
+      font: 600 clamp(20px, 3vw, 28px) Georgia, serif
+    }
+
+    .sum {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      padding: 6px 14px;
+      font-weight: 600
+    }
+
+    .pill i {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block
+    }
+
+    button.reset {
+      background: none;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      padding: 6px 14px;
+      font: inherit;
+      cursor: pointer
+    }
+
+    #plan {
+      position: relative;
+      width: min(100%, 1200px);
+      aspect-ratio: 3/2;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #000
+    }
+
+    #plan>img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block
+    }
+
+    .t {
+      position: absolute;
+      border: 3px solid var(--c);
+      background: color-mix(in srgb, var(--c) 14%, transparent);
+      border-radius: 8px;
+      cursor: pointer;
+      color: #fff;
+      transition: background .2s, border-color .2s, box-shadow .2s;
+      box-shadow: 0 0 0 1px #0006, 0 0 14px color-mix(in srgb, var(--c) 55%, transparent)
+    }
+
+    .t:hover,
+    .t:focus-visible {
+      background: color-mix(in srgb, var(--c) 28%, transparent);
+      outline: none
+    }
+
+    .t[data-s="free"] {
+      --c: var(--ok)
+    }
+
+    .t[data-s="res"] {
+      --c: var(--bad)
+    }
+
+    .t span {
+      position: absolute;
+      left: 50%;
+      bottom: -1px;
+      transform: translate(-50%, 50%);
+      background: var(--c);
+      color: #fff;
+      font: 700 clamp(8px, 1.05vw, 12px)/1 system-ui, sans-serif;
+      padding: .35em .7em;
+      border-radius: 99px;
+      white-space: nowrap;
+      letter-spacing: .03em
+    }
+
+    #tip {
+      width: min(100%, 1200px);
+      min-height: 2.6em;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 14px
+    }
+
+    .rules {
+      width: min(100%, 1200px);
+      font-size: 13px;
+      opacity: .8
+    }
+
+    #ctl {
+      width: min(100%, 1200px);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      align-items: center
+    }
+
+    #ctl label {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-weight: 600
+    }
+
+    #ctl input {
+      background: var(--card);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font: inherit;
+      color-scheme: light dark
+    }
+
+    #cats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      width: 100%;
+      align-items: center
+    }
+
+    #cats b {
+      font-weight: 600;
+      margin-right: 4px
+    }
+
+    .t[hidden] {
+      display: none
+    }
+
+    #slots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .chip {
+      background: var(--card);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      padding: 6px 14px;
+      font: inherit;
+      cursor: pointer
+    }
+
+    .chip[aria-pressed="true"] {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink)
+    }
+
+    .chip:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      text-decoration: line-through
+    }
+
+    #banner {
+      width: min(100%, 1200px);
+      background: color-mix(in srgb, var(--bad) 14%, var(--card));
+      border: 1px solid var(--bad);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    #banner[hidden] {
+      display: none
+    }
+
+    #banner button {
+      background: var(--bad);
+      color: #fff;
+      border: 0;
+      border-radius: 99px;
+      padding: 6px 14px;
+      font: inherit;
+      cursor: pointer
+    }
+
+    .t[data-s="off"] {
+      --c: #8a8a8a;
+      cursor: not-allowed;
+      box-shadow: none
+    }
+
+    #plan.off>img {
+      filter: grayscale(.7) brightness(.6)
+    }
+
+    body {
+      height: 100dvh;
+      padding: 8px 3vw 10px;
+      gap: 6px;
+      justify-content: flex-start
+    }
+
+    h1 {
+      font-size: clamp(17px, 2.2vw, 22px)
+    }
+
+    .rules {
+      font-size: 12px
+    }
+
+    .pill,
+    button.reset,
+    .chip {
+      padding: 4px 12px;
+      font-size: 13px
+    }
+
+    #ctl {
+      gap: 6px 14px
+    }
+
+    #ctl input {
+      padding: 3px 8px;
+      font-size: 13px
+    }
+
+    #ctl label {
+      font-size: 13px
+    }
+
+    #cats b {
+      font-size: 13px
+    }
+
+    #stage {
+      width: 100%;
+      flex: 1 1 0;
+      min-height: 230px;
+      container-type: size;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    #plan {
+      width: min(100cqw, 150cqh);
+      height: auto
+    }
+
+    #tip {
+      padding: 6px 12px;
+      font-size: 13px;
+      min-height: 0
+    }
+
+    #banner {
+      padding: 6px 12px;
+      font-size: 13px
+    }
+
+    #plan {
+      container-type: inline-size
+    }
+
+    .t {
+      border-width: clamp(2px, .28cqw, 3px)
+    }
+
+    .t span {
+      font-size: clamp(6.5px, 1.25cqw, 12px);
+      padding: .3em .6em
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Bella Vista – Table Status</h1>
+    <div class="sum">
+      <span class="pill"><i style="background:var(--ok)"></i>
+        <span id="nf">0</span> available
+      </span>
+      <span class="pill"><i style="background:var(--bad)"></i>
+        <span id="nr">0</span> reserved
+      </span>
+  </header>
+  <p class="rules">Open Tuesday–Sunday, 10:00 AM – 10:00 PM · Reservations in 2-hour dining blocks · Closed every Monday
+    for maintenance</p>
+  <div id="ctl">
+    <div id="cats" role="group" aria-label="Table category"></div>
+    <label>Date <input type="date" id="d"></label>
+    <div id="slots" role="group" aria-label="Dining block"></div>
+  </div>
+  <div id="banner" hidden></div>
+  <div id="stage">
+    <div id="plan">
+      <img alt="Bella Vista dining floor plan" src="images/Bella Vista Restaurant Floor Plan.png">
+    </div>
+  </div>
+  <div id="tip">Pick a table type, a date and a 2-hour block, then click a table to switch it between available (green)
+    and reserved (red).</div>
+  <script src="js/script.js"></script>
+
+  <script>
+    const W = 1536, H = 1024;                      // floor plan size in px (box coordinates are based on this)
+    const SLOTS = [10, 12, 14, 16, 18, 20];        // start hours; every block is 2 hours (last ends 10 PM)
+
+    // ---------- DUmmy Data Lang to----------
+    let reservations = [                           // replace with data fetched from your database
+      { tableId: 'S1', date: '2026-10-28', startHour: 10, status: 'Confirmed' },
+      { tableId: 'F1', date: '2026-10-28', startHour: 10, status: 'Confirmed' },
+      { tableId: 'S2', date: '2026-10-28', startHour: 12, status: 'Confirmed' }
+    ];
+
+    async function loadReservations(date) {
+      // const res = await fetch(`/api/reservations?date=${date}`);   // same shape as the array above
+      // reservations = await res.json();
+      paint();
+    }
+
+    // Called when the customer submits the form. Send it to your backend and throw an error if it fails
+    // (for example, if someone else just booked the table).
+    async function submitReservation(data) {
+      // connect to the backend database
+      // const res = await fetch('/api/reservations', {
+      //     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+      // });
+      // if (!res.ok) throw new Error('This table was just taken. Please choose another.');
+      console.log('Reservation submitted:', data);
+    }
+
+    const info = {
+      S: 'Standard · 2-4 guests · no reservation fee · ₱1,000 minimum food order',
+      F: 'Family · 5-8 guests · ₱500 reservation fee (consumable)',
+      V: 'VIP room · up to 15 guests (max 20) · ₱2,500 reservation fee (consumable) · +₱300 per guest above 15'
+    };
+    const GUESTS = { S: [2, 4], F: [5, 8], V: [1, 20] };   // [min, max] guests per category
+
+    const TABLES = [   
+      // id, label, category, box = [x1, y1, x2, y2]
+      { id: 'S1', label: 'S1', cat: 'S', box: [203, 143, 308, 266] },
+      { id: 'S2', label: 'S2', cat: 'S', box: [203, 294, 308, 422] },
+      { id: 'S3', label: 'S3', cat: 'S', box: [203, 440, 308, 568] },
+      { id: 'S4', label: 'S4', cat: 'S', box: [203, 588, 308, 712] },
+      { id: 'F1', label: 'F1', cat: 'F', box: [438, 100, 566, 310] },
+      { id: 'F2', label: 'F2', cat: 'F', box: [624, 100, 762, 310] },
+      { id: 'F3', label: 'F3', cat: 'F', box: [562, 404, 797, 550] },
+      { id: 'VIP1', label: 'VIP 1', cat: 'V', box: [884, 98, 1076, 284] },
+      { id: 'VIP2', label: 'VIP 2', cat: 'V', box: [1169, 98, 1361, 284] }
+    ];
+
+    const CATS = [['all', 'All tables'], ['S', 'Standard · S1–S4'], ['F', 'Family · F1–F3'], ['V', 'VIP rooms · VIP 1–2']];
+
+    // ---------- Helpers ----------
+    const $ = id => document.getElementById(id);
+    const plan = $('plan'), tip = $('tip'), dateEl = $('d'), slotsEl = $('slots'), banner = $('banner'), catsEl = $('cats');
+    const buttons = {};
+    let cat = 'all', slot = null;
+
+    const pad = n => String(n).padStart(2, '0');
+    const fmt = h => (h % 12 || 12) + ':00 ' + (h < 12 ? 'AM' : 'PM');
+    const label = h => fmt(h) + ' - ' + fmt(h + 2);
+    const iso = d => d.toLocaleDateString('en-CA');                                       // YYYY-MM-DD (local time)
+    const isMonday = date => new Date(date + 'T00:00').getDay() === 1;                    // closed on Mondays
+    const hasEnded = (date, h) => new Date(`${date}T${pad(h + 2)}:00`) <= new Date();     // block already finished
+    const isReserved = id => reservations.some(r =>
+      r.tableId === id && r.date === dateEl.value && r.startHour === slot && r.status !== 'Cancelled');
+
+    function nextOpenDay(date) {
+      const d = new Date(date + 'T00:00');
+      do d.setDate(d.getDate() + 1); while (d.getDay() === 1);
+      return iso(d);
+    }
+
+    // ---------- Category + time-slot buttons ----------
+    function renderCats() {
+      catsEl.innerHTML = '<b>Table type</b>';
+      CATS.forEach(([key, text]) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'chip'; b.textContent = text;
+        b.setAttribute('aria-pressed', String(key === cat));
+        b.onclick = () => { cat = key; renderCats(); paint(); tip.textContent = key === 'all' ? 'Showing every table.' : info[key]; };
+        catsEl.appendChild(b);
+      });
+    }
+
+    function renderSlots() {
+      slotsEl.innerHTML = '';
+      SLOTS.forEach(h => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'chip'; b.textContent = label(h);
+        b.disabled = isMonday(dateEl.value);
+        b.setAttribute('aria-pressed', String(h === slot));
+        b.onclick = () => { slot = h; renderSlots(); paint(); };
+        slotsEl.appendChild(b);
+      });
+    }
+
+    // ---------- Table states ----------
+    //   green  "Available" -> clickable, opens the reservation form
+    //   red    "Reserved"  -> taken for this date + time block, disabled
+    //   grey   "Closed"/"Past" -> Monday, or the block has already finished, disabled
+    function paint() {
+      const closed = isMonday(dateEl.value);
+      const past = slot !== null && hasEnded(dateEl.value, slot);
+      let free = 0, taken = 0;
+
+      TABLES.forEach(t => {
+        const b = buttons[t.id];
+        const reserved = !closed && isReserved(t.id);
+        const state = closed ? 'off' : reserved ? 'res' : past ? 'off' : 'free';
+        const show = cat === 'all' || t.cat === cat;
+
+        b.hidden = !show;
+        b.dataset.s = state;
+        b.disabled = state !== 'free';                             // only green tables can be clicked
+        b.querySelector('span').textContent = t.label + ' · ' +
+          (closed ? 'Closed' : reserved ? 'Reserved' : past ? 'Past' : 'Available');
+
+        if (show && state === 'free') free++;
+        if (show && state === 'res') taken++;
+      });
+
+      $('nf').textContent = free;
+      $('nr').textContent = taken;
+      plan.classList.toggle('off', closed);
+
+      banner.hidden = !closed;
+      if (closed) {
+        banner.innerHTML = '<span>Closed on Mondays for maintenance — reservations aren’t available on this day.</span>' +
+          '<button type="button" id="nx">Go to next open day</button>';
+        $('nx').onclick = () => { dateEl.value = nextOpenDay(dateEl.value); onDateChange(); };
+      }
+    }
+
+    // ---------- Reservation form (opens when a green table is clicked) ----------
+    document.head.insertAdjacentHTML('beforeend', `<style>
+                                      .t:disabled{cursor:not-allowed}
+                                      #resForm{margin:auto;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:20px;width:min(92vw,420px)}
+                                      #resForm::backdrop{background:#0008}
+                                      #resForm h2{font:600 20px Georgia,serif;margin-bottom:4px}
+                                      #resForm p{font-size:13px;opacity:.8;margin-bottom:12px}
+                                      #resForm label{display:block;font-size:13px;font-weight:600;margin-top:10px}
+                                      #resForm input,#resForm textarea{width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:inherit;font:inherit}
+                                      #resForm .row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+                                      #resForm button{border-radius:99px;padding:8px 18px;font:inherit;cursor:pointer;border:1px solid var(--line);background:none;color:inherit}
+                                      #resForm button.ok{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:600}
+                                      #resMsg{color:var(--bad);font-size:13px;margin-top:8px;min-height:1em}
+                                      </style>`);
+
+    const dlg = document.createElement('dialog');
+    dlg.id = 'resForm';
+    dlg.innerHTML = `
+                    <form id="resFormEl">
+                        <h2 id="resTitle"></h2><p id="resInfo"></p>
+                        <label>Full name<input name="name" required></label>
+                        <label>Phone number<input name="phone" type="tel" required></label>
+                        <label>Number of guests<input name="guests" type="number" required></label>
+                        <label>Notes (optional)<textarea name="notes" rows="2"></textarea></label>
+                        <div id="resMsg"></div>
+                        <div class="row"><button type="button" id="resCancel">Cancel</button><button class="ok" type="submit">Confirm reservation</button></div>
+                    </form>`;
+    document.body.appendChild(dlg);
+
+    let current = null;                                                // table being reserved
+    const form = $('resFormEl');
+
+    function openForm(t) {
+      current = t;
+      const [min, max] = GUESTS[t.cat];
+      $('resTitle').textContent = `Reserve ${t.label}`;
+      $('resInfo').textContent = `${dateEl.value} · ${label(slot)} — ${info[t.cat]}`;
+      $('resMsg').textContent = '';
+      form.reset();
+      form.guests.min = min; form.guests.max = max; form.guests.value = min;
+      dlg.showModal();
+    }
+
+    $('resCancel').onclick = () => dlg.close();
+
+    form.onsubmit = async e => {
+      e.preventDefault();
+      if (isReserved(current.id)) { 
+        $('resMsg').textContent = 'This table was just taken.'; 
+        return; 
+      }
+      const data = { 
+        tableId: current.id, 
+        date: dateEl.value, 
+        startHour: slot, 
+        ...Object.fromEntries(new FormData(form)) 
+      };
+      try {
+        await submitReservation(data);
+        reservations.push({ 
+          tableId: data.tableId, 
+          date: data.date, 
+          startHour: data.startHour, 
+          status: 'Confirmed' 
+        });
+        dlg.close();
+        tip.textContent = `${current.label} reserved for ${label(slot)} on ${data.date}.`;
+        paint();
+      } catch (err) {
+        $('resMsg').textContent = err.message;
+        loadReservations(dateEl.value);                            // refresh so the table turns red if it was taken
+      }
+    };
+
+    // ---------- Build the table buttons ----------
+    TABLES.forEach(t => {
+      const [x1, y1, x2, y2] = t.box;
+      const b = document.createElement('button');
+      b.className = 't'; 
+      b.type = 'button'; 
+      b.innerHTML = '<span></span>';
+      b.style.cssText = `left:${x1 / W * 100}%;top:${y1 / H * 100}%;width:${(x2 - x1) / W * 100}%;height:${(y2 - y1) / H * 100}%`;
+      b.onclick = () => openForm(t);
+      b.onmouseenter = b.onfocus = () => { tip.textContent = `${t.label} — ${info[t.cat]}`; };
+      plan.appendChild(b);
+      buttons[t.id] = b;
+    });
+
+    // ---------- Start ----------
+    function onDateChange() {
+      if (!dateEl.value) dateEl.value = iso(new Date());
+      if (isMonday(dateEl.value)) slot = null;
+      else if (slot === null) slot = SLOTS.find(h => !hasEnded(dateEl.value, h)) ?? SLOTS[0];
+      renderSlots();
+      loadReservations(dateEl.value);                                // fetch + paint
+    }
+
+    $('rs')?.remove();                                                 // old "Clear" button is no longer needed
+    const today = new Date(), max = new Date();
+    max.setDate(max.getDate() + 90);                                   // bookable up to 90 days ahead
+    dateEl.min = iso(today);
+    dateEl.max = iso(max);
+    dateEl.value = isMonday(iso(today)) ? nextOpenDay(iso(today)) : iso(today);
+    dateEl.onchange = onDateChange;
+    renderCats();
+    onDateChange();
+  </script>
+</body>
+
+</html>

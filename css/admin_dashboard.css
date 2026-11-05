@@ -1,0 +1,138 @@
+
+/* Phones: one field per row */
+.field-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.form-field {
+  width: 100%;
+}
+
+/* iPad and laptop: all three in one row, centered */
+@media (min-width: 576px) {
+  .field-row {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-end;
+  }
+
+  .form-field {
+    flex: 1 1 0;
+    width: auto;
+    max-width: 260px;
+  }
+}
+
+/* ================= staff dashboard ================= */
+
+.dash-tabs {
+  display: flex;
+  gap: .5rem;
+  margin: 1rem 0;
+  border-bottom: 1px solid var(--bs-border-color, #ddd);
+}
+.dash-tabs button {
+  padding: .6rem 1rem;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dash-tabs button.active { border-bottom-color: currentColor; }
+
+/* the four statuses: floor plan buttons and legend dots */
+
+.floor-plan {
+    position: relative;
+    width: min(100%, 1200px);
+    aspect-ratio: 3/2;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: #000;
+}
+
+.floor-plan > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.floor-plan button {
+    position: absolute;
+    border-radius: 0.50rem;
+}
+
+.floor-plan button[data-status="available"], .dot[data-status="available"] { background-color: rgba(0, 255, 0, 0.35) !important; }
+.floor-plan button[data-status="reserved"],  .dot[data-status="reserved"]  { background-color: rgba(255, 0, 0, 0.35) !important; }
+.floor-plan button[data-status="occupied"],  .dot[data-status="occupied"]  { background-color: rgba(255, 165, 68, 0.45) !important; }
+.floor-plan button[data-status="cleanup"],   .dot[data-status="cleanup"]   { background-color: rgba(0, 0, 255, 0.35) !important; }
+.dot {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: .25rem;
+  vertical-align: middle;
+  border: 1px solid rgba(0, 0, 0, .2);
+}
+
+#tableDialog [hidden] { display: none !important; }
+
+/* orders */
+.orders-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.order-card {
+  padding: .75rem;
+  margin-bottom: .75rem;
+  border: 1px solid var(--bs-border-color, #ddd);
+  border-radius: .5rem;
+}
+.order-card ul { margin: .5rem 0; padding-left: 1.1rem; }
+.order-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .5rem; }
+
+/* report */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.stat { padding: 1rem; border: 1px solid var(--bs-border-color, #ddd); border-radius: .5rem; }
+.stat strong { display: block; font-size: 1.5rem; }
+#reportTable th, #reportTable td {
+  padding: .4rem .5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--bs-border-color, #ddd);
+}
+
+.closed-banner {
+  margin: 1rem 0;
+  padding: .75rem;
+  text-align: center;
+  border-radius: .5rem;
+  background: rgba(249, 115, 22, 0.15);
+}
+
+@media (max-width: 800px) { .orders-board { grid-template-columns: 1fr; } }
+
+.view-switch { display: flex; gap: .5rem; margin-bottom: 1rem; }
+.view-switch button {
+  padding: .4rem .9rem;
+  border: 1px solid var(--bs-border-color, #ccc);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+.view-switch button.active { font-weight: 700; border-color: currentColor; }
+
+.table-scroll { overflow-x: auto; }
+.orders-table { width: 100%; border-collapse: collapse; }
+.orders-table th, .orders-table td {
+  padding: .5rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--bs-border-color, #ddd);
+}
+.orders-table ul { margin: 0; padding-left: 1.1rem; }
+
+/* the grid on .orders-board would otherwise override the hidden attribute */
+.dash-tab [hidden] { display: none !important; }
